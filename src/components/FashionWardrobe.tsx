@@ -6,16 +6,32 @@ import { ArrowLeft, Upload, Sparkles, User, Shirt, TrendingUp } from 'lucide-rea
 // Import generated images
 import maleGenderImg from '@/assets/male-gender.jpg';
 import femaleGenderImg from '@/assets/female-gender.jpg';
-import casualStyleImg from '@/assets/casual-style.jpg';
-import formalStyleImg from '@/assets/formal-style.jpg';
-import vintageStyleImg from '@/assets/vintage-style.jpg';
-import sportyStyleImg from '@/assets/sporty-style.jpg';
+import maleCasualStyleImg from '@/assets/male-casual-style.jpg';
+import maleFormalStyleImg from '@/assets/male-formal-style.jpg';
+import maleVintageStyleImg from '@/assets/male-vintage-style.jpg';
+import maleSportyStyleImg from '@/assets/male-sporty-style.jpg';
+import femaleCasualStyleImg from '@/assets/female-casual-style.jpg';
+import femaleFormalStyleImg from '@/assets/female-formal-style.jpg';
+import femaleVintageStyleImg from '@/assets/female-vintage-style.jpg';
+import femaleSportyStyleImg from '@/assets/female-sporty-style.jpg';
 import topItemImg from '@/assets/top-item.jpg';
 import bottomItemImg from '@/assets/bottom-item.jpg';
 import fullOutfitImg from '@/assets/full-outfit.jpg';
 import rectangleBodyImg from '@/assets/rectangle-body.jpg';
 import hourglassBodyImg from '@/assets/hourglass-body.jpg';
 import heightGuideImg from '@/assets/height-guide.jpg';
+import maleJeansImg from '@/assets/male-jeans.jpg';
+import maleTrousersImg from '@/assets/male-trousers.jpg';
+import maleShortsImg from '@/assets/male-shorts.jpg';
+import femaleJeansImg from '@/assets/female-jeans.jpg';
+import femaleSkirtImg from '@/assets/female-skirt.jpg';
+import femaleTrousersImg from '@/assets/female-trousers.jpg';
+import colorBlackImg from '@/assets/color-black.jpg';
+import colorWhiteImg from '@/assets/color-white.jpg';
+import colorBlueImg from '@/assets/color-blue.jpg';
+import colorRedImg from '@/assets/color-red.jpg';
+import colorGreenImg from '@/assets/color-green.jpg';
+import colorBrownImg from '@/assets/color-brown.jpg';
 
 // Mock API key placeholder - users would add their actual API key here
 const API_KEY = 'your-api-key-here';
@@ -27,7 +43,8 @@ interface UserData {
   style: string;
   recommendationType: string;
   specificItem?: string;
-  uploadedImage?: File;
+  currentClothesType?: string;
+  currentClothesColor?: string;
 }
 
 interface StepOption {
@@ -50,7 +67,6 @@ const FashionWardrobe = () => {
     analysis: string;
     accessories: string;
   } | null>(null);
-  const [uploadPreview, setUploadPreview] = useState<string | null>(null);
 
   const genderOptions: StepOption[] = [
     { id: 'male', label: 'Male', image: maleGenderImg },
@@ -78,11 +94,18 @@ const FashionWardrobe = () => {
     { id: 'tall', label: 'Tall', image: heightGuideImg },
   ];
 
-  const styleOptions: StepOption[] = [
-    { id: 'casual', label: 'Casual', image: casualStyleImg },
-    { id: 'formal', label: 'Formal', image: formalStyleImg },
-    { id: 'vintage', label: 'Vintage', image: vintageStyleImg },
-    { id: 'sporty', label: 'Sporty', image: sportyStyleImg },
+  const maleStyleOptions: StepOption[] = [
+    { id: 'casual', label: 'Casual', image: maleCasualStyleImg },
+    { id: 'formal', label: 'Formal', image: maleFormalStyleImg },
+    { id: 'vintage', label: 'Vintage', image: maleVintageStyleImg },
+    { id: 'sporty', label: 'Sporty', image: maleSportyStyleImg },
+  ];
+
+  const femaleStyleOptions: StepOption[] = [
+    { id: 'casual', label: 'Casual', image: femaleCasualStyleImg },
+    { id: 'formal', label: 'Formal', image: femaleFormalStyleImg },
+    { id: 'vintage', label: 'Vintage', image: femaleVintageStyleImg },
+    { id: 'sporty', label: 'Sporty', image: femaleSportyStyleImg },
   ];
 
   const recommendationTypes: StepOption[] = [
@@ -98,56 +121,56 @@ const FashionWardrobe = () => {
     { id: 'blazer', label: 'Blazer', image: topItemImg },
   ];
 
-  const bottomItems: StepOption[] = [
-    { id: 'jeans', label: 'Jeans', image: bottomItemImg },
-    { id: 'skirt', label: 'Skirt', image: bottomItemImg },
-    { id: 'trousers', label: 'Trousers', image: bottomItemImg },
-    { id: 'shorts', label: 'Shorts', image: bottomItemImg },
+  const maleCurrentBottoms: StepOption[] = [
+    { id: 'jeans', label: 'Jeans', image: maleJeansImg },
+    { id: 'trousers', label: 'Trousers', image: maleTrousersImg },
+    { id: 'shorts', label: 'Shorts', image: maleShortsImg },
+  ];
+
+  const femaleCurrentBottoms: StepOption[] = [
+    { id: 'jeans', label: 'Jeans', image: femaleJeansImg },
+    { id: 'skirt', label: 'Skirt', image: femaleSkirtImg },
+    { id: 'trousers', label: 'Trousers', image: femaleTrousersImg },
+  ];
+
+  const colorOptions: StepOption[] = [
+    { id: 'black', label: 'Black', image: colorBlackImg },
+    { id: 'white', label: 'White', image: colorWhiteImg },
+    { id: 'blue', label: 'Blue', image: colorBlueImg },
+    { id: 'red', label: 'Red', image: colorRedImg },
+    { id: 'green', label: 'Green', image: colorGreenImg },
+    { id: 'brown', label: 'Brown', image: colorBrownImg },
   ];
 
   const handleSelection = useCallback((value: string) => {
-    const stepMap = ['gender', 'bodyShape', 'height', 'style', 'recommendationType', 'specificItem'];
+    const stepMap = ['gender', 'bodyShape', 'height', 'style', 'recommendationType', 'specificItem', 'currentClothesType', 'currentClothesColor'];
     const currentField = stepMap[currentStep - 1] as keyof UserData;
     
     setUserData(prev => ({ ...prev, [currentField]: value }));
     
     // Auto-advance to next step, with conditional logic
     if (currentStep === 5 && value === 'full-outfit') {
-      // Skip specific item selection for full outfit
+      // Skip specific item selection for full outfit and go to current clothes
       setCurrentStep(7);
-    } else if (currentStep < 7) {
+    } else if (currentStep < 8) {
       setCurrentStep(prev => prev + 1);
     }
   }, [currentStep]);
 
-  const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setUserData(prev => ({ ...prev, uploadedImage: file }));
-      
-      // Create preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setUploadPreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  }, []);
-
   const handleGetRecommendation = useCallback(async () => {
     setIsLoading(true);
-    setCurrentStep(8); // Loading screen
+    setCurrentStep(9); // Loading screen
     
     // Simulate AI processing
     setTimeout(() => {
       setRecommendation({
-        analysis: "Based on your body type and style preferences, this outfit perfectly complements your silhouette. The colors enhance your natural features while the cut flatters your body shape. The styling creates a balanced and harmonious look that aligns with your personal aesthetic.",
+        analysis: `Based on your ${userData.bodyShape} body type and ${userData.style} style preferences, combined with your current ${userData.currentClothesColor} ${userData.currentClothesType}, this outfit perfectly complements your silhouette. The colors enhance your natural features while the cut flatters your body shape. The styling creates a balanced and harmonious look that aligns with your personal aesthetic.`,
         accessories: "• A delicate gold necklace to add elegance\n• A structured handbag that complements the outfit's lines\n• Classic pointed-toe flats or low heels\n• A silk scarf for a pop of color\n• Minimalist earrings to frame your face"
       });
       setIsLoading(false);
-      setCurrentStep(9); // Results screen
+      setCurrentStep(10); // Results screen
     }, 3000);
-  }, []);
+  }, [userData]);
 
   const handleStartOver = useCallback(() => {
     setCurrentStep(0);
@@ -158,7 +181,6 @@ const FashionWardrobe = () => {
       style: '',
       recommendationType: '',
     });
-    setUploadPreview(null);
     setRecommendation(null);
   }, []);
 
@@ -195,7 +217,7 @@ const FashionWardrobe = () => {
   );
 
   const getProgressPercentage = () => {
-    const totalSteps = userData.recommendationType === 'full-outfit' ? 7 : 8;
+    const totalSteps = userData.recommendationType === 'full-outfit' ? 8 : 9;
     return (currentStep / totalSteps) * 100;
   };
 
@@ -203,7 +225,7 @@ const FashionWardrobe = () => {
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-4xl">
         {/* Progress bar */}
-        {currentStep > 0 && currentStep < 8 && (
+        {currentStep > 0 && currentStep < 9 && (
           <div className="mb-8">
             <div className="w-full bg-muted rounded-full h-2">
               <div 
@@ -293,7 +315,7 @@ const FashionWardrobe = () => {
               <h2 className="text-3xl font-bold mb-2">Choose Your Style</h2>
               <p className="text-muted-foreground">What style resonates with you most?</p>
             </div>
-            {renderStepOptions(styleOptions)}
+            {renderStepOptions(userData.gender === 'male' ? maleStyleOptions : femaleStyleOptions)}
             <Button 
               variant="outline" 
               onClick={goBack}
@@ -334,7 +356,7 @@ const FashionWardrobe = () => {
               </h2>
               <p className="text-muted-foreground">What specific item are you looking for?</p>
             </div>
-            {renderStepOptions(userData.recommendationType === 'top' ? topItems : bottomItems)}
+            {renderStepOptions(userData.recommendationType === 'top' ? topItems : (userData.gender === 'male' ? maleCurrentBottoms : femaleCurrentBottoms))}
             <Button 
               variant="outline" 
               onClick={goBack}
@@ -346,46 +368,46 @@ const FashionWardrobe = () => {
           </div>
         )}
 
-        {/* Step 7: Image Upload */}
+        {/* Step 7: Current Clothes Type (conditional) */}
         {currentStep === 7 && (
           <div className="animate-slide-in-right">
             <div className="text-center mb-8">
-              <Upload className="w-12 h-12 mx-auto mb-4 text-primary" />
-              <h2 className="text-3xl font-bold mb-2">Upload Your Outfit</h2>
-              <p className="text-muted-foreground">Upload a photo of your outfit for personalized analysis</p>
+              <Shirt className="w-12 h-12 mx-auto mb-4 text-primary" />
+              <h2 className="text-3xl font-bold mb-2">
+                What {userData.recommendationType === 'top' ? 'bottoms' : 'tops'} do you currently have?
+              </h2>
+              <p className="text-muted-foreground">
+                Tell us about your current {userData.recommendationType === 'top' ? 'bottom' : 'top'} clothing
+              </p>
             </div>
-            
-            <div className="max-w-md mx-auto">
-              <label className="upload-area block cursor-pointer">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
-                <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-lg font-medium mb-2">Click to upload image</p>
-                <p className="text-sm text-muted-foreground">PNG, JPG up to 10MB</p>
-              </label>
-              
-              {uploadPreview && (
-                <div className="mt-6">
-                  <img
-                    src={uploadPreview}
-                    alt="Upload preview"
-                    className="w-full max-w-xs mx-auto rounded-lg shadow-lg"
-                  />
-                  <Button
-                    onClick={handleGetRecommendation}
-                    className="btn-hero w-full mt-6"
-                    disabled={!userData.uploadedImage}
-                  >
-                    Get My Recommendation
-                  </Button>
-                </div>
-              )}
+            {userData.recommendationType === 'top' 
+              ? renderStepOptions(userData.gender === 'male' ? maleCurrentBottoms : femaleCurrentBottoms)
+              : renderStepOptions(topItems)
+            }
+            <Button 
+              variant="outline" 
+              onClick={goBack}
+              className="mt-6"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+          </div>
+        )}
+
+        {/* Step 8: Current Clothes Color */}
+        {currentStep === 8 && (
+          <div className="animate-slide-in-right">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold mb-2">What color is your current clothing?</h2>
+              <p className="text-muted-foreground">This helps us recommend the best matching colors</p>
             </div>
-            
+            {renderStepOptions(colorOptions)}
+            <div className="text-center mt-8">
+              <Button onClick={handleGetRecommendation} className="btn-hero">
+                Get My Recommendation
+              </Button>
+            </div>
             <Button 
               variant="outline" 
               onClick={goBack}
@@ -398,7 +420,7 @@ const FashionWardrobe = () => {
         )}
 
         {/* Loading Screen */}
-        {currentStep === 8 && isLoading && (
+        {currentStep === 9 && isLoading && (
           <div className="text-center animate-fade-in">
             <div className="spinner mx-auto mb-6"></div>
             <h2 className="text-2xl font-bold mb-2">Analyzing Your Style...</h2>
@@ -407,7 +429,7 @@ const FashionWardrobe = () => {
         )}
 
         {/* Results Screen */}
-        {currentStep === 9 && recommendation && (
+        {currentStep === 10 && recommendation && (
           <div className="animate-fade-in">
             <div className="text-center mb-8">
               <Sparkles className="w-12 h-12 mx-auto mb-4 text-primary" />
