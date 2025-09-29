@@ -1,7 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ArrowLeft, Upload, Sparkles, User, Shirt, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Upload, Sparkles, User, Shirt, TrendingUp, ExternalLink } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 // Import generated images
 import maleGenderImg from '@/assets/male-gender.jpg';
@@ -66,6 +67,13 @@ const FashionWardrobe = () => {
   const [recommendation, setRecommendation] = useState<{
     analysis: string;
     accessories: string;
+    crawledRecommendations?: Array<{
+      title: string;
+      description: string;
+      imageUrl: string;
+      price: string;
+      url: string;
+    }>;
   } | null>(null);
 
   const genderOptions: StepOption[] = [
@@ -161,15 +169,42 @@ const FashionWardrobe = () => {
     setIsLoading(true);
     setCurrentStep(9); // Loading screen
     
-    // Simulate AI processing
-    setTimeout(() => {
+    try {
+      // Call the fashion crawler edge function
+      const { data, error } = await supabase.functions.invoke('fashion-crawler', {
+        body: {
+          gender: userData.gender,
+          bodyShape: userData.bodyShape,
+          height: userData.height,
+          style: userData.style,
+          recommendationType: userData.recommendationType,
+          currentItem: userData.currentClothesType,
+          currentColor: userData.currentClothesColor,
+        }
+      });
+
+      if (error) {
+        console.error('Error calling fashion crawler:', error);
+        throw error;
+      }
+
+      setRecommendation({
+        analysis: data.analysis.colorAnalysis + " " + data.analysis.styleAnalysis,
+        accessories: data.analysis.accessorySuggestions.map((item: string) => `• ${item}`).join('\n'),
+        crawledRecommendations: data.recommendations
+      });
+      
+    } catch (error) {
+      console.error('Failed to get recommendations:', error);
+      // Fallback to mock data
       setRecommendation({
         analysis: `Based on your ${userData.bodyShape} body type and ${userData.style} style preferences, combined with your current ${userData.currentClothesColor} ${userData.currentClothesType}, this outfit perfectly complements your silhouette. The colors enhance your natural features while the cut flatters your body shape. The styling creates a balanced and harmonious look that aligns with your personal aesthetic.`,
         accessories: "• A delicate gold necklace to add elegance\n• A structured handbag that complements the outfit's lines\n• Classic pointed-toe flats or low heels\n• A silk scarf for a pop of color\n• Minimalist earrings to frame your face"
       });
+    } finally {
       setIsLoading(false);
       setCurrentStep(10); // Results screen
-    }, 3000);
+    }
   }, [userData]);
 
   const handleStartOver = useCallback(() => {
@@ -436,7 +471,7 @@ const FashionWardrobe = () => {
               <h2 className="text-3xl font-bold mb-2">Your Fashion Recommendation</h2>
             </div>
             
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-2 gap-8 mb-8">
               <Card className="fashion-card">
                 <h3 className="text-xl font-bold mb-4 text-primary">Color & Style Analysis</h3>
                 <p className="text-muted-foreground leading-relaxed">{recommendation.analysis}</p>
@@ -449,6 +484,41 @@ const FashionWardrobe = () => {
                 </div>
               </Card>
             </div>
+
+            {/* Crawled Fashion Recommendations */}
+            {recommendation.crawledRecommendations && recommendation.crawledRecommendations.length > 0 && (
+              <div className="mb-8">
+                <h3 className="text-2xl font-bold mb-6 text-center">Recommended Items</h3>
+                <div className="grid md:grid-cols-3 gap-6">
+                  {recommendation.crawledRecommendations.map((item, index) => (
+                    <Card key={index} className="fashion-card overflow-hidden hover:scale-105 transition-transform">
+                      <div className="aspect-square overflow-hidden">
+                        <img
+                          src={item.imageUrl}
+                          alt={item.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="p-4">
+                        <h4 className="font-semibold mb-2 line-clamp-2">{item.title}</h4>
+                        <p className="text-sm text-muted-foreground mb-3 line-clamp-3">{item.description}</p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-lg font-bold text-primary">{item.price}</span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(item.url, '_blank')}
+                          >
+                            <ExternalLink className="w-4 h-4 mr-1" />
+                            View
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
             
             <div className="text-center mt-8">
               <Button onClick={handleStartOver} className="btn-hero">
