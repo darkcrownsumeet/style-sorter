@@ -20,6 +20,14 @@ import bottomItemImg from '@/assets/bottom-item.jpg';
 import fullOutfitImg from '@/assets/full-outfit.jpg';
 import rectangleBodyImg from '@/assets/rectangle-body.jpg';
 import hourglassBodyImg from '@/assets/hourglass-body.jpg';
+import maleRectangleBodyImg from '@/assets/male-rectangle-body.jpg';
+import maleTriangleBodyImg from '@/assets/male-triangle-body.jpg';
+import maleInvertedTriangleBodyImg from '@/assets/male-inverted-triangle-body.jpg';
+import maleOvalBodyImg from '@/assets/male-oval-body.jpg';
+import femalePearBodyImg from '@/assets/female-pear-body.jpg';
+import femaleAppleBodyImg from '@/assets/female-apple-body.jpg';
+import femaleRectangleBodyImg from '@/assets/female-rectangle-body.jpg';
+import femaleInvertedTriangleBodyImg from '@/assets/female-inverted-triangle-body.jpg';
 import heightGuideImg from '@/assets/height-guide.jpg';
 import maleJeansImg from '@/assets/male-jeans.jpg';
 import maleTrousersImg from '@/assets/male-trousers.jpg';
@@ -82,18 +90,18 @@ const FashionWardrobe = () => {
   ];
 
   const maleBodyShapes: StepOption[] = [
-    { id: 'rectangle', label: 'Rectangle', image: rectangleBodyImg },
-    { id: 'triangle', label: 'Triangle', image: rectangleBodyImg },
-    { id: 'inverted-triangle', label: 'Inverted Triangle', image: rectangleBodyImg },
-    { id: 'oval', label: 'Oval', image: rectangleBodyImg },
+    { id: 'rectangle', label: 'Rectangle', image: maleRectangleBodyImg },
+    { id: 'triangle', label: 'Triangle', image: maleTriangleBodyImg },
+    { id: 'inverted-triangle', label: 'Inverted Triangle', image: maleInvertedTriangleBodyImg },
+    { id: 'oval', label: 'Oval', image: maleOvalBodyImg },
   ];
 
   const femaleBodyShapes: StepOption[] = [
     { id: 'hourglass', label: 'Hourglass', image: hourglassBodyImg },
-    { id: 'pear', label: 'Pear', image: hourglassBodyImg },
-    { id: 'apple', label: 'Apple', image: rectangleBodyImg },
-    { id: 'rectangle', label: 'Rectangle', image: rectangleBodyImg },
-    { id: 'inverted-triangle', label: 'Inverted Triangle', image: rectangleBodyImg },
+    { id: 'pear', label: 'Pear', image: femalePearBodyImg },
+    { id: 'apple', label: 'Apple', image: femaleAppleBodyImg },
+    { id: 'rectangle', label: 'Rectangle', image: femaleRectangleBodyImg },
+    { id: 'inverted-triangle', label: 'Inverted Triangle', image: femaleInvertedTriangleBodyImg },
   ];
 
   const heightOptions: StepOption[] = [
