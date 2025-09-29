@@ -137,6 +137,13 @@ const FashionWardrobe = () => {
     { id: 'blazer', label: 'Blazer', image: topItemImg },
   ];
 
+  const bottomItems: StepOption[] = [
+    { id: 'jeans', label: 'Jeans', image: bottomItemImg },
+    { id: 'trousers', label: 'Trousers', image: bottomItemImg },
+    { id: 'shorts', label: 'Shorts', image: bottomItemImg },
+    { id: 'skirt', label: 'Skirt', image: bottomItemImg },
+  ];
+
   const maleCurrentBottoms: StepOption[] = [
     { id: 'jeans', label: 'Jeans', image: maleJeansImg },
     { id: 'trousers', label: 'Trousers', image: maleTrousersImg },
@@ -168,6 +175,9 @@ const FashionWardrobe = () => {
     if (currentStep === 5 && value === 'full-outfit') {
       // Skip specific item selection for full outfit and go to current clothes
       setCurrentStep(7);
+    } else if (currentStep === 8) {
+      // Don't auto-advance after color selection - user needs to click "Get Recommendation"
+      return;
     } else if (currentStep < 8) {
       setCurrentStep(prev => prev + 1);
     }
@@ -399,7 +409,7 @@ const FashionWardrobe = () => {
               </h2>
               <p className="text-muted-foreground">What specific item are you looking for?</p>
             </div>
-            {renderStepOptions(userData.recommendationType === 'top' ? topItems : (userData.gender === 'male' ? maleCurrentBottoms : femaleCurrentBottoms))}
+            {renderStepOptions(userData.recommendationType === 'top' ? topItems : bottomItems)}
             <Button 
               variant="outline" 
               onClick={goBack}
@@ -416,16 +426,18 @@ const FashionWardrobe = () => {
           <div className="animate-slide-in-right">
             <div className="text-center mb-8">
               <Shirt className="w-12 h-12 mx-auto mb-4 text-primary" />
-              <h2 className="text-3xl font-bold mb-2">
-                What {userData.recommendationType === 'top' ? 'bottoms' : 'tops'} do you currently have?
-              </h2>
-              <p className="text-muted-foreground">
-                Tell us about your current {userData.recommendationType === 'top' ? 'bottom' : 'top'} clothing
-              </p>
+               <h2 className="text-3xl font-bold mb-2">
+                 What {userData.recommendationType === 'top' ? 'bottoms' : userData.recommendationType === 'bottom' ? 'tops' : 'clothes'} do you currently have?
+               </h2>
+               <p className="text-muted-foreground">
+                 Tell us about your current {userData.recommendationType === 'top' ? 'bottom' : userData.recommendationType === 'bottom' ? 'top' : 'clothing'} items
+               </p>
             </div>
             {userData.recommendationType === 'top' 
               ? renderStepOptions(userData.gender === 'male' ? maleCurrentBottoms : femaleCurrentBottoms)
-              : renderStepOptions(topItems)
+              : userData.recommendationType === 'bottom'
+              ? renderStepOptions(topItems)
+              : renderStepOptions([...topItems, ...(userData.gender === 'male' ? maleCurrentBottoms : femaleCurrentBottoms)])
             }
             <Button 
               variant="outline" 
