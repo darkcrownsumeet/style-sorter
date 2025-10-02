@@ -83,30 +83,14 @@ function constructSearchQuery(data: CrawlRequest): string {
 async function crawlFashionData(query: string, requestData: CrawlRequest): Promise<FashionRecommendation[]> {
   console.log('Starting fashion data crawl for:', query);
   
-  // List of fashion websites to crawl
-  const fashionSites = [
-    'https://www.zara.com',
-    'https://www.hm.com', 
-    'https://www.uniqlo.com',
-    'https://www.asos.com'
-  ];
-  
   const recommendations: FashionRecommendation[] = [];
-  
-  // For demo purposes, we'll simulate crawling with mock data
-  // In a real implementation, you'd use a web scraping service or API
   const mockRecommendations = generateMockRecommendations(requestData);
   
   try {
-    // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Add the mock recommendations
     recommendations.push(...mockRecommendations);
-    
     console.log(`Found ${recommendations.length} recommendations`);
     return recommendations;
-    
   } catch (error) {
     console.error('Error crawling fashion data:', error);
     throw new Error('Failed to crawl fashion websites');
@@ -114,54 +98,92 @@ async function crawlFashionData(query: string, requestData: CrawlRequest): Promi
 }
 
 function generateMockRecommendations(data: CrawlRequest): FashionRecommendation[] {
-  const { gender, style, recommendationType } = data;
+  const { gender, style, recommendationType, currentItem, currentColor } = data;
   
-  const baseRecommendations = [
-    {
-      title: `${gender} ${style} ${recommendationType}`,
-      description: `Perfect ${style} ${recommendationType} for ${gender}. High quality materials and modern design.`,
-      imageUrl: `https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=400&h=600&fit=crop`,
-      price: '$49.99',
-      url: 'https://example-fashion-store.com/item1'
-    },
-    {
-      title: `Premium ${style} ${recommendationType}`,
-      description: `Elegant ${style} ${recommendationType} with exceptional comfort and style.`,
-      imageUrl: `https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=600&fit=crop`,
-      price: '$79.99', 
-      url: 'https://example-fashion-store.com/item2'
-    },
-    {
-      title: `Designer ${style} ${recommendationType}`,
-      description: `Luxurious ${style} ${recommendationType} from top designers. Perfect fit guaranteed.`,
-      imageUrl: `https://images.unsplash.com/photo-1506629905607-94b3d6c5c2c8?w=400&h=600&fit=crop`,
-      price: '$129.99',
-      url: 'https://example-fashion-store.com/item3'
-    }
+  const genderPath = gender === 'male' ? 'men' : 'women';
+  const categories: { [key: string]: string } = {
+    'top': 'tshirts',
+    'bottom': gender === 'male' ? 'jeans' : 'jeans',
+    'full-outfit': 'clothing'
+  };
+  
+  const category = categories[recommendationType] || 'clothing';
+  const searchQuery = `${gender}+${style}+${recommendationType}`.replace(/ /g, '+');
+  
+  const indianSites = [
+    { name: 'Myntra', url: 'https://www.myntra.com' },
+    { name: 'Ajio', url: 'https://www.ajio.com' },
+    { name: 'Amazon Fashion', url: 'https://www.amazon.in' }
   ];
   
-  // Customize based on gender
-  if (gender === 'female') {
-    baseRecommendations[0].imageUrl = 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&h=600&fit=crop';
-    baseRecommendations[1].imageUrl = 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=400&h=600&fit=crop';
-    baseRecommendations[2].imageUrl = 'https://images.unsplash.com/photo-1506629905607-94b3d6c5c2c8?w=400&h=600&fit=crop';
-  }
+  const recommendations = indianSites.map((site, index) => {
+    const priceRange = index === 0 ? '₹999' : index === 1 ? '₹1,499' : '₹1,999';
+    let siteUrl = '';
+    
+    if (site.name === 'Myntra') {
+      siteUrl = `${site.url}/${genderPath}?f=Categories:${category}&rawQuery=${searchQuery}`;
+    } else if (site.name === 'Ajio') {
+      siteUrl = `${site.url}/shop/${category}`;
+    } else {
+      siteUrl = `${site.url}/s?k=${searchQuery}`;
+    }
+    
+    return {
+      title: `${style.charAt(0).toUpperCase() + style.slice(1)} ${recommendationType === 'full-outfit' ? 'Outfit' : recommendationType.charAt(0).toUpperCase() + recommendationType.slice(1)} - ${site.name}`,
+      description: `Trending ${style} ${recommendationType} for ${gender}. ${currentColor ? `Matches perfectly with ${currentColor} ${currentItem || 'clothing'}. ` : ''}Premium quality from top Indian brands.`,
+      imageUrl: gender === 'male' 
+        ? `https://images.unsplash.com/photo-${1516826957135 + index}?w=400&h=600&fit=crop`
+        : `https://images.unsplash.com/photo-${1469334031218 + index}?w=400&h=600&fit=crop`,
+      price: priceRange,
+      url: siteUrl
+    };
+  });
   
-  return baseRecommendations;
+  return recommendations;
 }
 
 function generateStyleAnalysis(data: CrawlRequest): any {
-  const { bodyShape, style, currentColor, currentItem } = data;
+  const { bodyShape, style, currentColor, currentItem, gender } = data;
+  
+  const accessoryLinks = [
+    {
+      item: 'Watch',
+      url: gender === 'male' 
+        ? 'https://www.myntra.com/watches?f=Categories:Watches&rawQuery=men+watches'
+        : 'https://www.myntra.com/watches?f=Categories:Watches&rawQuery=women+watches'
+    },
+    {
+      item: 'Belt',
+      url: gender === 'male'
+        ? 'https://www.ajio.com/shop/men-belts'
+        : 'https://www.ajio.com/shop/women-belts'
+    },
+    {
+      item: 'Shoes',
+      url: gender === 'male'
+        ? 'https://www.amazon.in/s?k=men+formal+shoes'
+        : 'https://www.amazon.in/s?k=women+heels'
+    },
+    {
+      item: 'Bag',
+      url: gender === 'male'
+        ? 'https://www.myntra.com/bags?f=Categories:Backpacks&rawQuery=men+bags'
+        : 'https://www.myntra.com/handbags'
+    }
+  ];
   
   return {
-    colorAnalysis: `${currentColor} is an excellent choice for your ${bodyShape} body shape. This color enhances your natural features and complements your ${style} style preference.`,
+    colorAnalysis: currentColor && currentItem
+      ? `${currentColor.charAt(0).toUpperCase() + currentColor.slice(1)} is an excellent choice for your ${bodyShape} body shape. This color enhances your natural features and complements your ${style} style preference.`
+      : `Your ${bodyShape} body shape works beautifully with ${style} style pieces.`,
     styleAnalysis: `Your ${style} style preference works perfectly with your body shape. The recommended pieces will accentuate your best features while maintaining comfort and confidence.`,
     accessorySuggestions: [
-      `Add a statement belt to define your waist`,
+      `Add a statement belt to define your proportions`,
       `Consider layering with a complementary jacket`,
-      `Minimal jewelry works best with ${style} style`,
-      `Choose shoes that elongate your silhouette`,
+      `${gender === 'male' ? 'A classic watch' : 'Minimal jewelry'} works best with ${style} style`,
+      `Choose ${gender === 'male' ? 'formal shoes' : 'heels or flats'} that elongate your silhouette`,
       `A structured bag completes the look`
-    ]
+    ],
+    accessoryLinks
   };
 }

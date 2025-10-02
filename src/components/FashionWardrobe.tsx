@@ -29,6 +29,10 @@ import femaleAppleBodyImg from '@/assets/female-apple-body.jpg';
 import femaleRectangleBodyImg from '@/assets/female-rectangle-body.jpg';
 import femaleInvertedTriangleBodyImg from '@/assets/female-inverted-triangle-body.jpg';
 import heightGuideImg from '@/assets/height-guide.jpg';
+import maleHeightGuideImg from '@/assets/male-height-guide.jpg';
+import maleTopItemImg from '@/assets/male-top-item.jpg';
+import maleBottomItemImg from '@/assets/male-bottom-item.jpg';
+import maleFullOutfitImg from '@/assets/male-full-outfit.jpg';
 import maleJeansImg from '@/assets/male-jeans.jpg';
 import maleTrousersImg from '@/assets/male-trousers.jpg';
 import maleShortsImg from '@/assets/male-shorts.jpg';
@@ -82,6 +86,10 @@ const FashionWardrobe = () => {
       price: string;
       url: string;
     }>;
+    accessoryLinks?: Array<{
+      item: string;
+      url: string;
+    }>;
   } | null>(null);
 
   const genderOptions: StepOption[] = [
@@ -104,11 +112,14 @@ const FashionWardrobe = () => {
     { id: 'inverted-triangle', label: 'Inverted Triangle', image: femaleInvertedTriangleBodyImg },
   ];
 
-  const heightOptions: StepOption[] = [
-    { id: 'short', label: 'Short', image: heightGuideImg },
-    { id: 'average', label: 'Average', image: heightGuideImg },
-    { id: 'tall', label: 'Tall', image: heightGuideImg },
-  ];
+  const getHeightOptions = (): StepOption[] => {
+    const heightImg = userData.gender === 'male' ? maleHeightGuideImg : heightGuideImg;
+    return [
+      { id: 'short', label: 'Short', image: heightImg },
+      { id: 'average', label: 'Average', image: heightImg },
+      { id: 'tall', label: 'Tall', image: heightImg },
+    ];
+  };
 
   const maleStyleOptions: StepOption[] = [
     { id: 'casual', label: 'Casual', image: maleCasualStyleImg },
@@ -124,25 +135,46 @@ const FashionWardrobe = () => {
     { id: 'sporty', label: 'Sporty', image: femaleSportyStyleImg },
   ];
 
-  const recommendationTypes: StepOption[] = [
-    { id: 'top', label: 'Top', image: topItemImg },
-    { id: 'bottom', label: 'Bottom', image: bottomItemImg },
-    { id: 'full-outfit', label: 'Full Outfit', image: fullOutfitImg },
-  ];
+  const getRecommendationTypes = (): StepOption[] => {
+    if (userData.gender === 'male') {
+      return [
+        { id: 'top', label: 'Top', image: maleTopItemImg },
+        { id: 'bottom', label: 'Bottom', image: maleBottomItemImg },
+        { id: 'full-outfit', label: 'Full Outfit', image: maleFullOutfitImg },
+      ];
+    }
+    return [
+      { id: 'top', label: 'Top', image: topItemImg },
+      { id: 'bottom', label: 'Bottom', image: bottomItemImg },
+      { id: 'full-outfit', label: 'Full Outfit', image: fullOutfitImg },
+    ];
+  };
 
-  const topItems: StepOption[] = [
-    { id: 't-shirt', label: 'T-Shirt', image: topItemImg },
-    { id: 'blouse', label: 'Blouse', image: topItemImg },
-    { id: 'sweater', label: 'Sweater', image: topItemImg },
-    { id: 'blazer', label: 'Blazer', image: topItemImg },
-  ];
+  const getTopItems = (): StepOption[] => {
+    const topImg = userData.gender === 'male' ? maleTopItemImg : topItemImg;
+    return [
+      { id: 't-shirt', label: 'T-Shirt', image: topImg },
+      { id: 'shirt', label: 'Shirt', image: topImg },
+      { id: 'sweater', label: 'Sweater', image: topImg },
+      { id: 'blazer', label: 'Blazer', image: topImg },
+    ];
+  };
 
-  const bottomItems: StepOption[] = [
-    { id: 'jeans', label: 'Jeans', image: bottomItemImg },
-    { id: 'trousers', label: 'Trousers', image: bottomItemImg },
-    { id: 'shorts', label: 'Shorts', image: bottomItemImg },
-    { id: 'skirt', label: 'Skirt', image: bottomItemImg },
-  ];
+  const getBottomItems = (): StepOption[] => {
+    const bottomImg = userData.gender === 'male' ? maleBottomItemImg : bottomItemImg;
+    if (userData.gender === 'male') {
+      return [
+        { id: 'jeans', label: 'Jeans', image: bottomImg },
+        { id: 'trousers', label: 'Trousers', image: bottomImg },
+        { id: 'shorts', label: 'Shorts', image: bottomImg },
+      ];
+    }
+    return [
+      { id: 'jeans', label: 'Jeans', image: bottomImg },
+      { id: 'trousers', label: 'Trousers', image: bottomImg },
+      { id: 'skirt', label: 'Skirt', image: bottomImg },
+    ];
+  };
 
   const maleCurrentBottoms: StepOption[] = [
     { id: 'jeans', label: 'Jeans', image: maleJeansImg },
@@ -209,7 +241,8 @@ const FashionWardrobe = () => {
       setRecommendation({
         analysis: data.analysis.colorAnalysis + " " + data.analysis.styleAnalysis,
         accessories: data.analysis.accessorySuggestions.map((item: string) => `• ${item}`).join('\n'),
-        crawledRecommendations: data.recommendations
+        crawledRecommendations: data.recommendations,
+        accessoryLinks: data.analysis.accessoryLinks
       });
       
     } catch (error) {
@@ -298,7 +331,7 @@ const FashionWardrobe = () => {
                 Fashion Wardrobe
               </h1>
               <p className="text-xl text-muted-foreground mb-8">
-                Discover your perfect style with AI-powered fashion recommendations
+                Discover your perfect style with personalized fashion recommendations
               </p>
             </div>
             <Button 
@@ -348,7 +381,7 @@ const FashionWardrobe = () => {
               <h2 className="text-3xl font-bold mb-2">Select Your Height</h2>
               <p className="text-muted-foreground">This affects proportions and styling recommendations</p>
             </div>
-            {renderStepOptions(heightOptions)}
+            {renderStepOptions(getHeightOptions())}
             <Button 
               variant="outline" 
               onClick={goBack}
@@ -388,7 +421,7 @@ const FashionWardrobe = () => {
               <h2 className="text-3xl font-bold mb-2">What Would You Like?</h2>
               <p className="text-muted-foreground">Choose what type of recommendation you need</p>
             </div>
-            {renderStepOptions(recommendationTypes)}
+            {renderStepOptions(getRecommendationTypes())}
             <Button 
               variant="outline" 
               onClick={goBack}
@@ -409,7 +442,7 @@ const FashionWardrobe = () => {
               </h2>
               <p className="text-muted-foreground">What specific item are you looking for?</p>
             </div>
-            {renderStepOptions(userData.recommendationType === 'top' ? topItems : bottomItems)}
+            {renderStepOptions(userData.recommendationType === 'top' ? getTopItems() : getBottomItems())}
             <Button 
               variant="outline" 
               onClick={goBack}
@@ -436,8 +469,8 @@ const FashionWardrobe = () => {
             {userData.recommendationType === 'top' 
               ? renderStepOptions(userData.gender === 'male' ? maleCurrentBottoms : femaleCurrentBottoms)
               : userData.recommendationType === 'bottom'
-              ? renderStepOptions(topItems)
-              : renderStepOptions([...topItems, ...(userData.gender === 'male' ? maleCurrentBottoms : femaleCurrentBottoms)])
+              ? renderStepOptions(getTopItems())
+              : renderStepOptions([...getTopItems(), ...(userData.gender === 'male' ? maleCurrentBottoms : femaleCurrentBottoms)])
             }
             <Button 
               variant="outline" 
@@ -479,7 +512,7 @@ const FashionWardrobe = () => {
           <div className="text-center animate-fade-in">
             <div className="spinner mx-auto mb-6"></div>
             <h2 className="text-2xl font-bold mb-2">Analyzing Your Style...</h2>
-            <p className="text-muted-foreground">Our AI is crafting personalized recommendations for you</p>
+            <p className="text-muted-foreground">Crafting personalized recommendations for you</p>
           </div>
         )}
 
@@ -499,9 +532,23 @@ const FashionWardrobe = () => {
               
               <Card className="fashion-card">
                 <h3 className="text-xl font-bold mb-4 text-primary">Accessory Suggestions</h3>
-                <div className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                <div className="text-muted-foreground leading-relaxed whitespace-pre-line mb-4">
                   {recommendation.accessories}
                 </div>
+                {recommendation.accessoryLinks && recommendation.accessoryLinks.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    {recommendation.accessoryLinks.map((accessory, index) => (
+                      <Button
+                        key={index}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(accessory.url, '_blank')}
+                      >
+                        Shop {accessory.item}
+                      </Button>
+                    ))}
+                  </div>
+                )}
               </Card>
             </div>
 
